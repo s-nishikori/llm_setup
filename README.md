@@ -126,13 +126,18 @@ LM Studio自身もOpenAI互換APIを提供していますが、それは基本�
 
 ### さらに簡単にするなら
 
-Windows側の`connect.bat`にVast.aiの接続先が設定済みなら、コマンドを毎回入力せず、次の順で起動できます。
+Windows側の`connect.bat`にある`VAST_HOST`と`VAST_PORT`の仮値を、Vast.aiに表示される自分の接続先へ編集しておけば、コマンドを毎回入力せず、次の順で起動できます。
+
+```bat
+if not defined VAST_HOST set "VAST_HOST=<VAST_HOST>"
+if not defined VAST_PORT set "VAST_PORT=<SSH_PORT>"
+```
 
 1. `connect.bat`を起動し、SSHトンネルのウィンドウを開いたままにします。
 2. `status.bat`を実行し、vLLMへの接続を確認します。
 3. LM Studioを開き、上記のOpenAI-compatible endpoint adapterを選択してチャットします。
 
-接続先が変わった場合は、`VAST_HOST`と`VAST_PORT`を環境変数で指定してから`connect.bat`を起動できます。
+ファイルを編集せず一時的に接続先を変更する場合は、`VAST_HOST`と`VAST_PORT`を環境変数で指定してから`connect.bat`を起動できます。
 
 ```powershell
 $env:VAST_HOST = '<VAST_HOST>'

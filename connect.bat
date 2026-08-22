@@ -3,8 +3,8 @@ setlocal
 
 rem Defaults can be overridden with VAST_HOST, VAST_PORT, VAST_USER,
 rem LOCAL_PORT, and REMOTE_PORT environment variables.
-if not defined VAST_HOST set "VAST_HOST=192.220.55.116"
-if not defined VAST_PORT set "VAST_PORT=21294"
+if not defined VAST_HOST set "VAST_HOST=REPLACE_WITH_VAST_HOST"
+if not defined VAST_PORT set "VAST_PORT=REPLACE_WITH_SSH_PORT"
 if not defined VAST_USER set "VAST_USER=root"
 if not defined LOCAL_PORT set "LOCAL_PORT=8000"
 if not defined REMOTE_PORT set "REMOTE_PORT=8000"
