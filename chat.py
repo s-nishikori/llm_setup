@@ -35,7 +35,7 @@ def create_client() -> tuple[OpenAI, str]:
             "VLLM_API_KEY is not configured. Copy .env.example to .env and set the API key."
         )
 
-    base_url = os.getenv("OPENAI_BASE_URL", "http://localhost:8000/v1").rstrip("/")
+    base_url = os.getenv("OPENAI_BASE_URL", "http://localhost:8080/v1").rstrip("/")
     model = os.getenv("SERVED_MODEL_NAME", "qwen")
     return OpenAI(base_url=base_url, api_key=api_key), model
 

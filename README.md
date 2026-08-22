@@ -39,7 +39,13 @@ nano .env
 
 32GB GPUで27B級を動かす場合、BF16版は通常VRAMに収まらないため、対応するAWQ/GPTQ/FP8等の量子化モデルを選びます。量子化モデルは第三者配布の場合があるため、配布元、モデルカード、ライセンス、vLLM対応状況を確認してください。リポジトリには特定の非公式モデルIDを初期値として固定していません。
 
-既定の`HOST=127.0.0.1`は、APIを外部へ直接公開しないための設定です。
+既定の`HOST=127.0.0.1`は、APIを外部へ直接公開しないための設定です。Vast.aiのvLLMテンプレートでは、ポート`8000`が認証付きポータルなどに使用され、テンプレート付属のvLLMが`18000`で起動している場合があります。このリポジトリでは競合を避けるため、自前のvLLMに`PORT=18001`を使用します。
+
+使用状況は起動前に確認できます。
+
+```bash
+ss -ltnp | grep -E ':8000|:18000|:18001'
+```
 
 ## 3. モデルを取得
 
@@ -50,6 +56,8 @@ nano .env
 モデルは既定で`/workspace/models/qwen`へ保存されます。Vast.aiの永続ボリュームを使う場合は、そのマウント先に`MODEL_DIR`を変更してください。事前ダウンロードを省略して`start_vllm.sh`を実行すると、vLLMが`MODEL_ID`から直接取得します。
 
 ## 4. vLLMを起動
+
+テンプレート付属のvLLMがGPUを使用している場合は、先に`supervisorctl status`で管理名を確認し、`supervisorctl stop <管理名>`で停止します。子プロセスだけを`kill`するとSupervisorが自動再起動する場合があります。
 
 ```bash
 ./scripts/start_vllm.sh
@@ -77,10 +85,10 @@ tmux new -s vllm
 Windows PowerShellでSSHトンネルを開いたままにします。
 
 ```powershell
-ssh -N -L 8000:localhost:8000 -p <SSH_PORT> root@<VAST_HOST>
+ssh -N -L 8080:localhost:18001 -p <SSH_PORT> root@<VAST_HOST>
 ```
 
-Windows側からは`http://localhost:8000/v1`へ接続できます。Windowsにもこのリポジトリをcloneし、そのディレクトリで次を実行します。
+Windows側からは`http://localhost:8080/v1`へ接続できます。`8080`はWindows側の待受ポート、`18001`はVast.ai側で自前vLLMが待ち受けるポートです。Windowsにもこのリポジトリをcloneし、そのディレクトリで次を実行します。
 
 ```powershell
 $env:VLLM_API_KEY = '<.envと同じAPIキー>'
@@ -89,7 +97,7 @@ python -m pip install openai
 python examples/client.py
 ```
 
-ポート8000をVast.aiで公開する必要はありません。公開する場合は、APIキーだけに頼らずTLS、ファイアウォール、リバースプロキシ等も設定してください。
+ポート`18001`をVast.aiで外部公開する必要はありません。公開する場合は、APIキーだけに頼らずTLS、ファイアウォール、リバースプロキシ等も設定してください。
 
 ## 6. LM Studioと連携
 
@@ -107,7 +115,7 @@ LM Studioと連携できます。vLLMがOpenAI互換APIを提供しているた�
 2. WindowsでSSHトンネルを開きます。
 
    ```powershell
-   ssh -N -L 8000:localhost:8000 -p <SSH_PORT> root@<VAST_HOST>
+   ssh -N -L 8080:localhost:18001 -p <SSH_PORT> root@<VAST_HOST>
    ```
 
 3. LM Studioに、公式Hubの[OpenAI-compatible endpoint adapter](https://lmstudio.ai/lmstudio/openai-compat-endpoint)を追加します。
@@ -115,7 +123,7 @@ LM Studioと連携できます。vLLMがOpenAI互換APIを提供しているた�
 4. アダプターの接続情報を設定します。
 
    ```text
-   Base URL: http://localhost:8000/v1
+   Base URL: http://localhost:8080/v1
    API Key:  Vast.ai側の.envにあるVLLM_API_KEY
    Model:    qwen
    ```
@@ -142,6 +150,8 @@ if not defined VAST_PORT set "VAST_PORT=<SSH_PORT>"
 ```powershell
 $env:VAST_HOST = '<VAST_HOST>'
 $env:VAST_PORT = '<SSH_PORT>'
+$env:LOCAL_PORT = '8080'
+$env:REMOTE_PORT = '18001'
 .\connect.bat
 ```
 
@@ -181,7 +191,7 @@ Vast.aiのvLLMテンプレート内でDockerを二重起動する必要はあり
 ```bash
 docker build --build-arg VLLM_IMAGE=vllm/vllm-openai:<TESTED_TAG> -t qwen-vast .
 docker run --gpus all --ipc=host --env-file .env -e HOST=0.0.0.0 \
-  -p 127.0.0.1:8000:8000 \
+  -p 127.0.0.1:8080:18001 \
   -v /workspace/models:/workspace/models qwen-vast
 ```
 

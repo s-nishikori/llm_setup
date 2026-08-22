@@ -8,7 +8,7 @@ if exist ".venv\Scripts\python.exe" (
     set "PYTHON=python"
 )
 
-echo Checking http://localhost:8000/v1 ...
+echo Checking http://localhost:8080/v1 ...
 %PYTHON% chat.py --status
 if errorlevel 1 (
     echo.

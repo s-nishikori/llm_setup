@@ -8,7 +8,7 @@ load_env
 require_value VLLM_API_KEY
 
 HOST="${HOST:-127.0.0.1}"
-PORT="${PORT:-8000}"
+PORT="${PORT:-18001}"
 SERVED_MODEL_NAME="${SERVED_MODEL_NAME:-qwen}"
 base_url="http://${HOST}:${PORT}/v1"
 

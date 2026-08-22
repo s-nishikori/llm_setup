@@ -8,6 +8,6 @@ RUN python -m pip install --no-cache-dir -r requirements.txt
 COPY scripts/ ./scripts/
 RUN chmod +x ./scripts/*.sh
 
-EXPOSE 8000
+EXPOSE 18001
 ENTRYPOINT []
 CMD ["./scripts/start_vllm.sh"]
