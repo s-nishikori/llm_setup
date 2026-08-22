@@ -91,7 +91,56 @@ python examples/client.py
 
 ポート8000をVast.aiで公開する必要はありません。公開する場合は、APIキーだけに頼らずTLS、ファイアウォール、リバースプロキシ等も設定してください。
 
-## 6. GitHubへpush
+## 6. LM Studioと連携
+
+LM Studioと連携できます。vLLMがOpenAI互換APIを提供しているためです。最も簡単な構成は次のとおりです。
+
+### LM Studioで操作する
+
+1. Vast.aiでvLLMを起動します。
+
+   ```bash
+   cd /workspace/llm_setup
+   ./scripts/start_vllm.sh
+   ```
+
+2. WindowsでSSHトンネルを開きます。
+
+   ```powershell
+   ssh -N -L 8000:localhost:8000 -p <SSH_PORT> root@<VAST_HOST>
+   ```
+
+3. LM Studioに、公式Hubの[OpenAI-compatible endpoint adapter](https://lmstudio.ai/lmstudio/openai-compat-endpoint)を追加します。
+
+4. アダプターの接続情報を設定します。
+
+   ```text
+   Base URL: http://localhost:8000/v1
+   API Key:  Vast.ai側の.envにあるVLLM_API_KEY
+   Model:    qwen
+   ```
+
+これで、LM Studioのチャット画面からVast.ai上のQwenを操作できます。ただし、このアダプター方式はLM Studio本体でローカルモデルを動かす通常構成とは異なるため、バージョンによって設定画面が変わる可能性があります。
+
+LM Studio自身もOpenAI互換APIを提供していますが、それは基本的に「LM Studioをサーバーとして使う」方向です。ここではLM Studioをクライアントとして、SSHトンネル越しのvLLMへ接続します。詳しくは[LM Studio公式のOpenAI互換API資料](https://lmstudio.ai/docs/developer/openai-compat)を参照してください。
+
+### さらに簡単にするなら
+
+Windows側の`connect.bat`にVast.aiの接続先が設定済みなら、コマンドを毎回入力せず、次の順で起動できます。
+
+1. `connect.bat`を起動し、SSHトンネルのウィンドウを開いたままにします。
+2. `status.bat`を実行し、vLLMへの接続を確認します。
+3. LM Studioを開き、上記のOpenAI-compatible endpoint adapterを選択してチャットします。
+
+接続先が変わった場合は、`VAST_HOST`と`VAST_PORT`を環境変数で指定してから`connect.bat`を起動できます。
+
+```powershell
+$env:VAST_HOST = '<VAST_HOST>'
+$env:VAST_PORT = '<SSH_PORT>'
+.\connect.bat
+```
+
+## 7. GitHubへpush
 
 GitHubで空のリポジトリを作成後、ローカルまたはVast.ai上で実行します。
 
